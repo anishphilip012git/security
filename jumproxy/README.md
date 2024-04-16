@@ -1,6 +1,11 @@
 # Jumproxy
 
 ## Overview
+Network Security is a myth. Even when we have SSL based communication for example while doing SSH on our critical servers, we are always prone to pre-auth /xero-day vulnerabilities.
+Did you know that the initila fingerprint in the banner which shows up when you connect to the host for the first time asks you that especially because of this vulnerability.
+If your network communincation  is compromised the first day you did SSH, then an attacker can always sniff your keys (during initial key exchange and instead become the man in the middle)
+
+Which is why we thought of jumproxy:
 
 Jumproxy is a "jump" proxy designed to add an extra layer of encryption to connections towards TCP services, enhancing security by protecting against potential vulnerabilities in publicly accessible services like SSH servers. The tool is built using Go and leverages the Crypto library for robust AES-256 encryption.
 
