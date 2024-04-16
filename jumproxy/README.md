@@ -70,4 +70,4 @@ ssh -o "ProxyCommand ./jumproxy -k mykey 192.168.0.123 2222" user@localhost
 
 ---
 
-This README is tailored to clearly explain how to set up and use Jumproxy, ensuring compliance with the homework specifications and providing detailed instructions for both server and client usage. It also includes a strategy for testing and a list of helpful resources for further learning.
+This README is tailored to clearly explain how to set up and use Jumproxy. I assume no legal responsibility from its usage. 
