@@ -1,0 +1,189 @@
+HTTP and TLS Traffic Sniffer README
+===================================
+
+Description
+-----------
+This Python script uses the Scapy library to sniff network traffic for HTTP requests and TLS Client Hello messages. It extracts and displays detailed information about captured HTTP requests, such as the method, URI, and host. For TLS traffic, it specifically looks for and extracts the Server Name Indication (SNI) from TLS Client Hello messages.
+
+The script supports real-time network traffic sniffing on specified interfaces or analyzing traffic from a pcap file. It's designed for educational purposes, network debugging, or security analysis within legal boundaries and ethical guidelines.
+
+Usage
+-----
+To run the script, use the following command syntax:
+
+  sudo python3 http_tls_sniffer.py [-i interface] [-r tracefile] [expression]
+
+- `-i`, `--interface`: Specify the network interface to sniff on (optional,used if reading from a tracefile).
+- `-r`, `--tracefile`: Read packets from a tracefile instead of live sniffing (optional).
+I 
+- `expression`: Apply a BPF (Berkeley Packet Filter) to filter the traffic (optional).
+
+
+Note : Preference order:
+1. First prefernce to tracefile, if file given it will read from tracefile
+2. If not given it wil see if any specific network interface is selected. If not it uses all network interfaces y default.
+3. Tool can only be used  to read from file or from network interface at one time. Needs to be run again to switch.
+4. If expression given , it will be used in both cases.
+
+
+Example Output  Generic output Format
+--------------
+
+Starting to Sniff HTTP and TLS traffic.
+:-----------------HTTP
+2024-03-10 10:15:00 HTTP 192.168.1.2:55678 -> 93.184.216.34:80 example.com GET /index.html
+
+:-++++++++++----TLS
+2024-03-10 10:16:45 TLS 192.168.1.2:55679 -> 93.184.216.34:443 www.example.com
+
+
+
+Example Output  Case: No additional argument(take all network interfaces and no file )
+--------------
+root@DAISYANU:/home/netsec/hw/hw2# python3 mysniffer.py 
+Starting to Sniff HTTP and TLS traffic.
+Filter expression:  
+:-++++++++++----TLS
+2024-03-09 18:26:19.958843 TLS 172.23.24.155:51794 -> 20.42.65.85:443 mobile.events.data.microsoft.com
+:-++++++++++----TLS
+2024-03-09 18:26:19.982894 TLS 172.23.24.155:51794 -> 20.42.65.85:443 mobile.events.data.microsoft.com
+:-++++++++++----TLS
+2024-03-09 18:26:23.443856 TLS 172.23.24.155:43146 -> 20.42.65.85:443 mobile.events.data.microsoft.com
+:-++++++++++----TLS
+2024-03-09 18:26:23.468253 TLS 172.23.24.155:43146 -> 20.42.65.85:443 mobile.events.data.microsoft.com
+:-++++++++++----TLS
+2024-03-09 18:26:30.387115 TLS 172.23.24.155:47416 -> 142.250.65.164:443 www.google.com
+:-++++++++++----TLS
+2024-03-09 18:27:52.404938 TLS 172.23.24.155:36926 -> 142.251.40.196:443 www.google.com
+:-++++++++++----TLS
+2024-03-09 18:27:58.670674 TLS 172.23.24.155:60440 -> 142.251.40.196:443 www.google.com
+:-++++++++++----TLS
+2024-03-09 18:27:58.971730 TLS 172.23.24.155:60450 -> 142.251.40.196:443 www.google.com
+:-++++++++++----TLS
+2024-03-09 18:27:59.263291 TLS 172.23.24.155:60466 -> 142.251.40.196:443 www.google.com
+
+
+Example Output  Case : Bpa Filter from file 1
+--------------
+root@DAISYANU:/home/netsec/hw/hw2# python3 mysniffer.py 'src port 54634' -r hw1.pcap
+Starting to Sniff HTTP and TLS traffic.
+Trace File:  hw1.pcap
+Filter expression:  src port 54634
+reading from file hw1.pcap, link-type EN10MB (Ethernet), snapshot length 65535
+:-----------------HTTP
+2024-03-09 18:15:46.467547 HTTP 192.168.0.200:54634 -> 91.189.91.14:80 us.archive.ubuntu.com GET /ubuntu/dists/oneiric/InRelease
+:-----------------HTTP
+2024-03-09 18:15:46.469364 HTTP 192.168.0.200:54634 -> 91.189.91.14:80 us.archive.ubuntu.com GET /ubuntu/dists/oneiric/Release.gpg
+:-----------------HTTP
+2024-03-09 18:15:46.470188 HTTP 192.168.0.200:54634 -> 91.189.91.14:80 us.archive.ubuntu.com GET /ubuntu/dists/oneiric-backports/Release.gpg
+:-----------------HTTP
+2024-03-09 18:15:46.470939 HTTP 192.168.0.200:54634 -> 91.189.91.14:80 us.archive.ubuntu.com GET /ubuntu/dists/oneiric/Release
+:-----------------HTTP
+2024-03-09 18:15:46.471367 HTTP 192.168.0.200:54634 -> 91.189.91.14:80 us.archive.ubuntu.com GET /ubuntu/dists/oneiric-updates/Release
+:-----------------HTTP
+2024-03-09 18:15:46.472170 HTTP 192.168.0.200:54634 -> 91.189.91.14:80 us.archive.ubuntu.com GET /ubuntu/dists/oneiric-backports/Release
+:-----------------HTTP
+2024-03-09 18:15:46.477804 HTTP 192.168.0.200:54634 -> 91.189.91.14:80 us.archive.ubuntu.com GET /ubuntu/dists/oneiric/main/source/Sources.bz2
+:-----------------HTTP
+2024-03-09 18:15:46.479107 HTTP 192.168.0.200:54634 -> 91.189.91.14:80 us.archive.ubuntu.com GET /ubuntu/dists/oneiric/universe/i18n/Index
+:-----------------HTTP
+2024-03-09 18:15:46.480268 HTTP 192.168.0.200:54634 -> 91.189.91.14:80 us.archive.ubuntu.com GET /ubuntu/dists/oneiric-updates/universe/binary-i386/Packages.bz2
+:-----------------HTTP
+2024-03-09 18:15:46.486547 HTTP 192.168.0.200:54634 -> 91.189.91.14:80 us.archive.ubuntu.com GET /ubuntu/dists/oneiric-updates/restricted/i18n/Index
+:-----------------HTTP
+2024-03-09 18:15:46.490442 HTTP 192.168.0.200:54634 -> 91.189.91.14:80 us.archive.ubuntu.com GET /ubuntu/dists/oneiric-updates/universe/i18n/Index
+:-----------------HTTP
+2024-03-09 18:15:46.494039 HTTP 192.168.0.200:54634 -> 91.189.91.14:80 us.archive.ubuntu.com GET /ubuntu/dists/oneiric-backports/main/source/Sources.bz2
+:-----------------HTTP
+2024-03-09 18:15:46.516326 HTTP 192.168.0.200:54634 -> 91.189.91.14:80 us.archive.ubuntu.com GET /ubuntu/dists/oneiric-backports/universe/source/Sources.bz2
+:-----------------HTTP
+2024-03-09 18:15:46.520947 HTTP 192.168.0.200:54634 -> 91.189.91.14:80 us.archive.ubuntu.com GET /ubuntu/dists/oneiric-backports/main/binary-i386/Packages.bz2
+:-----------------HTTP
+2024-03-09 18:15:46.521604 HTTP 192.168.0.200:54634 -> 91.189.91.14:80 us.archive.ubuntu.com GET /ubuntu/dists/oneiric/restricted/i18n/Translation-en.bz2
+root@DAISYANU:/home/netsec/hw/hw2#
+
+
+Example Output: Case - Bpa Filter from file and given interface , in this case file takes priority ,output same as above 
+--------------
+root@DAISYANU:/home/netsec/hw/hw2# python3 mysniffer.py 'src port 54634' -r hw1.pcap -i eth0
+Starting to Sniff HTTP and TLS traffic.
+Trace File:  hw1.pcap
+Filter expression:  src port 54634
+reading from file hw1.pcap, link-type EN10MB (Ethernet), snapshot length 65535
+:-----------------HTTP
+2024-03-09 19:07:08.158592 HTTP 192.168.0.200:54634 -> 91.189.91.14:80 us.archive.ubuntu.com GET /ubuntu/dists/oneiric/InRelease
+:-----------------HTTP
+2024-03-09 19:07:08.159434 HTTP 192.168.0.200:54634 -> 91.189.91.14:80 us.archive.ubuntu.com GET /ubuntu/dists/oneiric/Release.gpg
+:-----------------HTTP
+2024-03-09 19:07:08.159737 HTTP 192.168.0.200:54634 -> 91.189.91.14:80 us.archive.ubuntu.com GET /ubuntu/dists/oneiric-backports/Release.gpg
+:-----------------HTTP
+2024-03-09 19:07:08.160170 HTTP 192.168.0.200:54634 -> 91.189.91.14:80 us.archive.ubuntu.com GET /ubuntu/dists/oneiric/Release
+:-----------------HTTP
+2024-03-09 19:07:08.160434 HTTP 192.168.0.200:54634 -> 91.189.91.14:80 us.archive.ubuntu.com GET /ubuntu/dists/oneiric-updates/Release
+:-----------------HTTP
+2024-03-09 19:07:08.160730 HTTP 192.168.0.200:54634 -> 91.189.91.14:80 us.archive.ubuntu.com GET /ubuntu/dists/oneiric-backports/Release
+:-----------------HTTP
+2024-03-09 19:07:08.162014 HTTP 192.168.0.200:54634 -> 91.189.91.14:80 us.archive.ubuntu.com GET /ubuntu/dists/oneiric/main/source/Sources.bz2
+:-----------------HTTP
+2024-03-09 19:07:08.163759 HTTP 192.168.0.200:54634 -> 91.189.91.14:80 us.archive.ubuntu.com GET /ubuntu/dists/oneiric/universe/i18n/Index
+:-----------------HTTP
+2024-03-09 19:07:08.165803 HTTP 192.168.0.200:54634 -> 91.189.91.14:80 us.archive.ubuntu.com GET /ubuntu/dists/oneiric-updates/universe/binary-i386/Packages.bz2
+:-----------------HTTP
+2024-03-09 19:07:08.178298 HTTP 192.168.0.200:54634 -> 91.189.91.14:80 us.archive.ubuntu.com GET /ubuntu/dists/oneiric-updates/restricted/i18n/Index
+:-----------------HTTP
+2024-03-09 19:07:08.180029 HTTP 192.168.0.200:54634 -> 91.189.91.14:80 us.archive.ubuntu.com GET /ubuntu/dists/oneiric-updates/universe/i18n/Index
+:-----------------HTTP
+2024-03-09 19:07:08.183807 HTTP 192.168.0.200:54634 -> 91.189.91.14:80 us.archive.ubuntu.com GET /ubuntu/dists/oneiric-backports/main/source/Sources.bz2
+:-----------------HTTP
+2024-03-09 19:07:08.207180 HTTP 192.168.0.200:54634 -> 91.189.91.14:80 us.archive.ubuntu.com GET /ubuntu/dists/oneiric-backports/universe/source/Sources.bz2
+:-----------------HTTP
+2024-03-09 19:07:08.213365 HTTP 192.168.0.200:54634 -> 91.189.91.14:80 us.archive.ubuntu.com GET /ubuntu/dists/oneiric-backports/main/binary-i386/Packages.bz2
+:-----------------HTTP
+2024-03-09 19:07:08.214058 HTTP 192.168.0.200:54634 -> 91.189.91.14:80 us.archive.ubuntu.com GET /ubuntu/dists/oneiric/restricted/i18n/Translation-en.bz2
+root@DAISYANU:/home/netsec/hw/hw2#
+
+
+
+Example Output  Case : Bpa Filter from given network interface 
+--------------
+root@DAISYANU:/home/netsec/hw/hw2# python3 mysniffer.py 'dst port not 80' -i eth0 
+Starting to Sniff HTTP and TLS traffic.
+Filter expression:  dst port not 80
+:-++++++++++----TLS
+2024-03-09 18:18:52.860295 TLS 172.23.24.155:48466 -> 142.251.40.196:443 www.google.com
+
+
+Example Output:  Case with BPA for just BPA (e.g. dst) filter 1
+--------------
+root@DAISYANU:/home/netsec/hw/hw2# python3 mysniffer.py 'dst host 142.251.40.132'
+Starting to Sniff HTTP and TLS traffic.
+Filter expression:  dst host 142.251.40.132
+:-----------------HTTP
+2024-03-09 18:21:41.796885 HTTP 172.23.24.155:43082 -> 142.251.40.132:80 www.google.com GET /
+:-----------------HTTP
+2024-03-09 18:21:41.956405 HTTP 172.23.24.155:43098 -> 142.251.40.132:80 www.google.com GET /
+:-----------------HTTP
+2024-03-09 18:21:42.129669 HTTP 172.23.24.155:43102 -> 142.251.40.132:80 www.google.com GET /
+:-----------------HTTP
+2024-03-09 18:21:42.294087 HTTP 172.23.24.155:43110 -> 142.251.40.132:80 www.google.com GET /
+:-----------------HTTP
+2024-03-09 18:21:42.463597 HTTP 172.23.24.155:45452 -> 142.251.40.132:80 www.google.com GET /
+
+
+Example Output Case with BPA for just BPA (e.g. dst) filter 1
+--------------
+root@DAISYANU:/home/netsec/hw/hw2# python3 mysniffer.py 'src host 172.23.24.155 and dst port not 443'
+Starting to Sniff HTTP and TLS traffic.
+Filter expression:  src host 172.23.24.155 and dst port not 443
+:-----------------HTTP
+2024-03-09 18:24:15.247466 HTTP 172.23.24.155:47880 -> 142.250.65.164:80 www.google.com GET /
+:-----------------HTTP
+2024-03-09 18:24:15.721056 HTTP 172.23.24.155:47894 -> 142.250.65.164:80 www.google.com GET /
+:-----------------HTTP
+2024-03-09 18:24:15.901707 HTTP 172.23.24.155:47900 -> 142.250.65.164:80 www.google.com GET /
+:-----------------HTTP
+2024-03-09 18:24:16.064498 HTTP 172.23.24.155:47912 -> 142.250.65.164:80 www.google.com GET /
+:-----------------HTTP
+2024-03-09 18:24:16.228113 HTTP 172.23.24.155:47928 -> 142.250.65.164:80 www.google.com GET /
+
+--------------

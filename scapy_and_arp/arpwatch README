@@ -1,0 +1,60 @@
+# ARP Poisoning Attack Detector README
+
+## Description
+This program uses Scapy, a packet manipulation tool, to detect ARP poisoning attacks on your network. 
+
+ARP poisoning is a technique used in man-in-the-middle attacks where the attacker sends falsified ARP (Address Resolution Protocol) messages onto a local network. This program monitors ARP replies and alerts if a device's MAC address changes or if a new device appears, which could indicate an ARP poisoning attack.
+
+## Prerequisites
+- Python 3
+- Scapy
+- Unix-like operating system with `arp` command available
+
+## Setup
+Ensure you have Python 3 and Scapy installed on your system. Scapy can be installed using pip:
+done by -- pip install scapy
+
+## Usage
+Run the script with root privileges to enable packet sniffing capabilities. You can specify a network interface using the `-i` option. If no interface is specified, the program sniffs on all available interfaces.
+
+```bash
+sudo python3 arp_detector.py
+```
+
+To specify an interface (e.g., `eth0`):
+
+```bash
+sudo python3 arp_detector.py -i eth0
+```
+
+## Example Output
+Upon running the program, it first prints the initial ARP table and then starts monitoring ARP packets. Example alerts you might see include:
+
+```
+{'192.168.1.1': '00:1f:9d:8e:ad:a1', '192.168.1.105': '34:de:1a:de:54:f2'}
+Initial ARP table loaded. Monitoring for ARP poisoning...
+WARNING: 192.168.1.105 changed from 34:de:1a:de:54:f2 to 00:11:22:33:44:55
+New device detected: 192.168.1.106 with MAC 66:77:88:99:aa:bb
+```
+Real example screenshot attched in tar 
+In the example, the program detects an ARP reply indicating that the MAC address associated with `192.168.1.105` has changed, which could suggest an ARP poisoning attack. It also alerts about a new device `192.168.1.106` appearing on the network.
+
+Actual Example screenshots have been attached as images : 
+
+I tried 2 attempts , 
+1) in 1 attempt I tried to 
+arpspoof -i eth0 -t 192.168.1.1 192.168.1.5(same as machine)(to create blackholing of request (a kind of dos))
+
+
+2 )in 2 attempt I tried to 
+ arpspoof -i eth0 -t 192.168.1.1 192.168.1.7 (attacker's machine )
+
+ in both cases the attak has been detected as shown in images 
+
+
+
+
+
+## Disclaimer
+This tool is intended for network security analysis and should be used responsibly. Ensure you have permission to monitor the network and analyze traffic to avoid legal and ethical issues.
+

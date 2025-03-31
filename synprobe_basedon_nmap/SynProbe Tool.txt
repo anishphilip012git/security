@@ -1,0 +1,208 @@
+SynProbe Tool
+-------------------------------------------------------------------------------
+Description:
+SynProbe is a network scanning and service fingerprinting tool that performs TCP SYN scans to identify open ports on a target host and attempts to further identify the service running on each open port by sending probe requests. This tool can handle both TCP and TLS connections and differentiates between server-initiated and client-initiated communications.
+
+Capabilities:
+1. TCP SYN Scan to detect open ports.
+2. Differentiation between server-initiated and client-initiated responses.
+3. Sends HTTP GET requests to suspected HTTP(S) servers to check for typical web server responses.
+4. Sends generic newline characters to ports to check for any standard TCP/TLS response.
+5. It runs by default on pall the ports in this list: 21, 22, 23, 25, 80, 110, 143, 443, 587,853, 993, 3389, 8080.
+
+Supported Cases:
+- CASE #1: TCP Server-Initiated
+- CASE #2: TLS Server-Initiated
+- CASE #3: HTTP Server (response to HTTP GET request)
+- CASE #4: HTTPS Server (response to HTTP GET request over TLS)
+- CASE #5: Generic TCP Server (response to generic lines over TCP)
+- CASE #6: Generic TLS Server (response to generic lines over TLS)
+
+
+Logic :
+I implemented our code in way thatI forst check for 
+TLS and then TCP ,since all TLS are already TCP 
+
+This means, we check
+ CASE #2: TLS Server-Initiated 
+ and then  CASE #4: HTTPS Server (response to HTTP GET request over TLS)
+ and then  CASE #6: Generic TLS Server (response to generic lines over TLS)
+
+ only when we don't find a TLS connection do we move in to TCP
+ so we check CASE #1: TCP Server-Initiated
+ and then CASE #3: HTTP Server (response to HTTP GET request)
+ and then CASE #5: Generic TCP Server (response to generic lines over TCP)
+
+Usage:
+To run SynProbe, you will need Python 3 and the following Python libraries: 
+- scapy, 
+- socket, 
+- ssl, 
+- argparse
+You can install any missing libraries using pip (e.g., pip install scapy).
+
+Command to run the tool:
+sudo python3 synprobe.py -p <port> <target>
+
+Where:
+- <port> is the port number or range you want to scan (e.g., 80 or 80-90).
+- <target> is the IP address or hostname of the target system.
+
+Example Commands:
+- Scan a single port:
+  sudo python3 synprobe.py -p 80 www.example.com
+
+- Scan multiple ports:
+  sudo python3 synprobe.py -p 80-443 www.example.com
+
+- Scan default ports on a target:
+  sudo python3 synprobe.py www.example.com
+
+
+
+Notes:
+- Use of `sudo` is recommended when running SynProbe due to the requirement of elevated privileges for performing network scans and raw socket operations.
+
+
+Attached Screenshots of variosu use cases: 
+Here are some sample responses:
+
+┌──(root㉿kali)-[/home/kali/Desktop/hw4]
+└─# python3 synprobe.py -p 21 ftp.dlptest.com           
+Namespace(target='ftp.dlptest.com', ports='21')
+Open ports: [21]
+Probing port 21 on ftp.dlptest.com ===================
+TLS probe ftp.dlptest.com 21
+Port 21: Not TLS
+TCP probe ftp.dlptest.com 21
+Port 21: is of CASE #1: TCP server-initiated - 220 Welcome to the DLP Test FTP Server
+
+                                                                                                           
+┌──(root㉿kali)-[/home/kali/Desktop/hw4]
+└─# python3 synprobe.py -p 25 smtp.gmail.com            
+Namespace(target='smtp.gmail.com', ports='25')
+Open ports: [25]
+Probing port 25 on smtp.gmail.com ===================
+TLS probe smtp.gmail.com 25
+Port 25: Not TLS
+TCP probe smtp.gmail.com 25
+Port 25: is of CASE #1: TCP server-initiated - 220 smtp.gmail.com ESMTP cx23-20020a05620a51d700b007929bbc4b8dsm380472qkb.62 - gsmtp
+
+                                                                                                           
+┌──(root㉿kali)-[/home/kali/Desktop/hw4]
+└─# python3 synprobe.py -p 130 compute.cs.stonybrook.edu
+Namespace(target='compute.cs.stonybrook.edu', ports='130')
+Open ports: [130]
+Probing port 130 on compute.cs.stonybrook.edu ===================
+TLS probe compute.cs.stonybrook.edu 130
+Port 130: Error in TLS probe - [Errno 104] Connection reset by peer
+TCP probe compute.cs.stonybrook.edu 130
+Port 130: is of CASE #1: TCP server-initiated - SSH-2.0-OpenSSH_7.4
+
+
+──(root㉿kali)-[/home/kali/Desktop/hw4]
+└─# python3 synprobe.py -p 80 www.cs.stonybrook.edu     
+Namespace(target='www.cs.stonybrook.edu', ports='80')
+Open ports: [80]
+Probing port 80 on www.cs.stonybrook.edu ===================
+TLS probe www.cs.stonybrook.edu 80
+Port 80: Not TLS
+TCP probe www.cs.stonybrook.edu 80
+Port 80: No data received on initial connect, trying probes...
+Sending HTTP GET request...
+Port 80: is of CASE #3: HTTP server with GET Request - HTTP/1.1 404 Unknown site
+Connection: close
+Content-Length: 566
+Retry-After: 0
+Server: Pantheon
+Cache-Control: no-cache, must-revalidate
+Content-Type: text/html; charset=utf-8
+X-pantheon-serious-reason: The page could not be loaded properly.
+Date: Mon, 06 May 2024 03:40:39 GMT
+X-Served-By: cache-ewr18120-EWR
+X-Cache: MISS
+X-Cache-Hits: 0
+X-Timer: S1714966840.580976,VS0,VE29
+Vary: Cookie
+Age: 0
+Accept-Ranges: bytes
+Via: 1.1 varnish
+
+<!DOCTYPE HTML>
+      <html>
+        <head>
+          <title>404 - Unknown site</title>
+        </head>
+        <body style="font-family:Arial, Helvetica, sans-serif; text-align: center">
+          <div style='padding-block: 180px'>
+            <h1>
+              <div style='font-size: 180px; font-weight: 700'>404</div>
+              <div style='font-size: 24px; font-weight: 700'>Unknown site</div>
+            </h1>
+            <p style="font-size: 16px; font-weight: 400">The page could not be loaded properly.</p>
+          </div>
+        </body>
+      </html>
+
+
+┌──(root㉿kali)-[/home/kali/Desktop/hw4]
+└─# python3 synprobe.py -p 993 imap.gmail.com           
+Namespace(target='imap.gmail.com', ports='993')
+Open ports: [993]
+Probing port 993 on imap.gmail.com ===================
+TLS probe imap.gmail.com 993
+TLS Connection established.
+Cipher used: ('TLS_AES_256_GCM_SHA384', 'TLSv1.3', 256)
+Protocol version: TLSv1.3
+Port 993: is of CASE ##2:  TLS server-initiated - * OK Gimap ready for requests from 69.123.218.94 s8mb226546858qki
+
+                                                                                                           
+┌──(root㉿kali)-[/home/kali/Desktop/hw4]
+└─# python3 synprobe.py -p 465 smtp.gmail.com           
+Namespace(target='smtp.gmail.com', ports='465')
+Open ports: [465]
+Probing port 465 on smtp.gmail.com ===================
+TLS probe smtp.gmail.com 465
+TLS Connection established.
+Cipher used: ('TLS_AES_256_GCM_SHA384', 'TLSv1.3', 256)
+Protocol version: TLSv1.3
+Port 465: is of CASE ##2:  TLS server-initiated - 220 smtp.gmail.com ESMTP d14-20020a0cea8e000000b006a0dc0351cfsm3377752qvp.145 - gsmtp
+
+┌──(root㉿kali)-[/home/kali/Desktop/hw4]
+└─# python3 synprobe.py -p 853 8.8.8.8                  
+Namespace(target='8.8.8.8', ports='853')
+Open ports: [853]
+Probing port 853 on 8.8.8.8 ===================
+TLS probe 8.8.8.8 853
+TLS Connection established.
+Cipher used: ('TLS_AES_256_GCM_SHA384', 'TLSv1.3', 256)
+Protocol version: TLSv1.3
+Port 853: No data received on initial connect, trying HTTP GET probe...
+Sending HTTP GET request...
+Port 853: No data received after HTTP GET request.
+Sending generic request...
+Port 853: is of CASE ##6 and is a Generic TLS Server, for which we couldn't elicit repsonse
+
+
+──(root㉿kali)-[/home/kali/Desktop/hw4]
+└─# python3 synprobe.py smtp.gmail.com   
+Namespace(target='smtp.gmail.com', ports='21, 22, 23, 25, 80, 110, 143, 443, 587,853, 993, 3389, 8080')
+Open ports: [25, 587, 993]
+Probing port 25 on smtp.gmail.com ===================
+TLS probe smtp.gmail.com 25
+Port 25: Not TLS
+TCP probe smtp.gmail.com 25
+Port 25: is of CASE #1: TCP server-initiated - 220 smtp.gmail.com ESMTP g4-20020a05620a13c400b00792961d6cd3sm836756qkl.26 - gsmtp
+
+Probing port 587 on smtp.gmail.com ===================
+TLS probe smtp.gmail.com 587
+Port 587: Not TLS
+TCP probe smtp.gmail.com 587
+Port 587: is of CASE #1: TCP server-initiated - 220 smtp.gmail.com ESMTP g24-20020a05620a109800b007929d1570fdsm264643qkk.97 - gsmtp
+
+Probing port 993 on smtp.gmail.com ===================
+TLS probe smtp.gmail.com 993
+TLS Connection established.
+Cipher used: ('TLS_AES_256_GCM_SHA384', 'TLSv1.3', 256)
+Protocol version: TLSv1.3
+Port 993: is of CASE ##2:  TLS server-initiated - * OK Gimap ready for requests from 69.123.218.94 jz5mb111890615qvb
