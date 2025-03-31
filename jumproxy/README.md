@@ -1,73 +1,135 @@
-# Jumproxy
+# 🔐 Jumproxy
 
-## Overview
-Network Security is a myth. Even when we have SSL based communication for example while doing SSH on our critical servers, we are always prone to pre-auth /xero-day vulnerabilities.
-Did you know that the initila fingerprint in the banner which shows up when you connect to the host for the first time asks you that especially because of this vulnerability.
-If your network communincation  is compromised the first day you did SSH, then an attacker can always sniff your keys (during initial key exchange and instead become the man in the middle)
+A lightweight encrypted TCP proxy to safeguard SSH and other sensitive services against initial handshake interception and MITM (Man-in-the-Middle) attacks.
 
-Which is why we thought of jumproxy:
+---
 
-Jumproxy is a "jump" proxy designed to add an extra layer of encryption to connections towards TCP services, enhancing security by protecting against potential vulnerabilities in publicly accessible services like SSH servers. The tool is built using Go and leverages the Crypto library for robust AES-256 encryption.
+## 📖 Table of Contents
 
-## Key Features
+- [Overview](#overview)
+- [Features](#features)
+- [How It Works](#how-it-works)
+- [Installation](#installation)
+- [Usage](#usage)
+  - [Server Mode](#server-mode)
+  - [Client Mode](#client-mode)
+- [Technical Specifications](#technical-specifications)
+- [Requirements](#requirements)
+- [Resources](#resources)
+- [Disclaimer](#disclaimer)
 
-- **AES-256 GCM Encryption**: Ensures data integrity and confidentiality using AES-256 in Galois Counter Mode (GCM).
-- **Dual Mode Functionality**: Acts as both a client-side proxy and a server-side reverse proxy.
-- **Secure Key Derivation**: Utilizes PBKDF2 with SHA-256 for secure key derivation from a passphrase.
-- **Concurrent Session Management**: Capable of handling multiple concurrent sessions in server mode.
-- **Memory Safety**: Built in Go, a memory-safe language, minimizing the risk of memory corruption vulnerabilities.
+---
 
-## Requirements
+## 🧹 Overview
+
+Even with SSL/TLS-based protocols like SSH, network security can be compromised — especially during the initial handshake. If an attacker sniffs the connection during the first key exchange, they can impersonate the server and execute a man-in-the-middle (MITM) attack.
+
+**Jumproxy** is a "jump" proxy that acts as an encryption layer between the client and any TCP service (e.g., SSH). It wraps your connection in AES-256 GCM encryption, preventing passive sniffing and protecting pre-auth vulnerabilities on first-time connections.
+
+---
+
+## 🚀 Features
+
+- 🔒 **AES-256 GCM Encryption** for data confidentiality and integrity.
+- 🔀 **Bidirectional Proxy**: Functions as both client-side and server-side proxy.
+- 🧠 **Secure Key Derivation**: Uses PBKDF2 + SHA-256 from a passphrase file.
+- 🧵 **Concurrent Connection Handling**: Manages multiple sessions concurrently.
+- 🧼 **Memory Safety**: Developed in Go to reduce common memory vulnerabilities.
+- 🗂️ **Raw Binary Transmission**: Perfect for tunneling protocols like SSH.
+
+---
+
+## ⚙️ How It Works
+
+- Acts as a wrapper between SSH clients and SSH servers.
+- The client encrypts data before sending it to the Jumproxy server.
+- The server decrypts and forwards the data to the real destination.
+- Return traffic follows the reverse path, maintaining full-duplex encrypted transport.
+
+---
+
+## 🧱 Installation
+
+### Prerequisites
 
 - Go 1.15 or later
-- Network settings that allow TCP connections between the client and the server
+- A network path that allows TCP communication between the Jumproxy client and server
 
-## Installation
-
-Clone the repository and build the project:
+### Steps
 
 ```bash
 git clone https://github.com/anishphilip012git/netsec.git
-cd jumproxy
+cd netsec/jumproxy
 go build -o jumproxy
 ```
 
-## Usage Instructions
+---
 
-### Server Mode
+## 🧪 Usage
 
-Run Jumproxy in server mode to listen for inbound connections and relay them to a specified destination:
+### 🔌 Server Mode
+
+Start a Jumproxy instance that listens for encrypted traffic and forwards it to a destination:
 
 ```bash
 ./jumproxy -k [path_to_passphrase_file] -l [listen_port] [destination_host] [destination_port]
 ```
 
-### Client Mode
-
-Run Jumproxy in client mode to proxy traffic through a local instance, encrypting traffic sent to the server:
+**Example:**
 
 ```bash
-./jumproxy -k [path_to_passphrase_file] [server_host] [server_port]
-ssh -o "ProxyCommand ./jumproxy -k mykey 192.168.0.123 2222" user@localhost
+./jumproxy -k mypass.txt -l 2222 localhost 22
 ```
-
-## Compliance Specifications
-
-- **Encryption/Decryption**: Implements AES-256 GCM for secure, bidirectional encryption and decryption.
-- **Symmetric Key Usage**: Both the client and server use the same symmetric key derived from the provided passphrase file.
-- **Persistent Server Listening**: Continues to listen for new connections even after a connection is terminated.
-- **Nonces Managed Securely**: Ensures secure and appropriate management of nonces for encryption.
-- **Binary Data Handling**: Treats all I/O as raw binary data, suitable for protocols like SSH.
-- **Efficiency and Buffer Management**: Utilizes efficient I/O handling to ensure timely reading and writing of data.
-
-
-## Resources
-
-- [Go Programming Tour](https://go.dev/tour/welcome/1)
-- [Intro to Socket Programming in Go](https://www.developer.com/languages/intro-socket-programming-go/)
-- [Go Crypto Cipher Documentation](https://pkg.go.dev/crypto/cipher)
-- [Beginner's Guide to Netcat](https://medium.com/@HackTheBridge/beginners-guide-to-netcat-for-hackers-55abe449991d)
 
 ---
 
-This README is tailored to clearly explain how to set up and use Jumproxy. I assume no legal responsibility from its usage. 
+### 🔧 Client Mode
+
+Run Jumproxy on the client side and use it as a proxy for SSH:
+
+```bash
+./jumproxy -k [path_to_passphrase_file] [server_host] [server_port]
+```
+
+**With SSH ProxyCommand:**
+
+```bash
+ssh -o "ProxyCommand ./jumproxy -k mypass.txt 192.168.0.123 2222" user@localhost
+```
+
+---
+
+## 🧰 Technical Specifications
+
+- **Symmetric Encryption**: AES-256-GCM
+- **Key Derivation**: PBKDF2-HMAC-SHA256 from passphrase file
+- **Nonces**: Securely generated and managed per session
+- **Data Handling**: Raw, binary-safe I/O for protocol-agnostic forwarding
+- **Persistent Mode**: Server continues to accept new connections indefinitely
+- **Efficient I/O**: Buffered and goroutine-powered concurrent reads/writes
+
+---
+
+## 📦 Requirements
+
+- ✅ Go 1.15+
+- ✅ TCP connectivity between Jumproxy client and server
+- ✅ Same passphrase/key file on both ends
+
+---
+
+## 📚 Resources
+
+- [Go Crypto Cipher](https://pkg.go.dev/crypto/cipher)
+- [Go Socket Programming Intro](https://www.developer.com/languages/intro-socket-programming-go/)
+- [Netcat for Penetration Testing](https://medium.com/@HackTheBridge/beginners-guide-to-netcat-for-hackers-55abe449991d)
+- [Tour of Go](https://go.dev/tour/welcome/1)
+- [GitHub Repo](https://github.com/anishphilip012git/security/tree/main/jumproxy)
+
+---
+
+## ⚠️ Disclaimer
+
+This tool is provided strictly for educational and research purposes. The author assumes **no legal responsibility** for any misuse of Jumproxy on unauthorized networks.
+
+---

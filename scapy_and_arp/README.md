@@ -78,7 +78,7 @@
 ---
 
 ### 10. 🔗 **Links & References**
-- GitHub Repo: _[Add once published]_
+- GitHub Repo: ['repo](https://github.com/anishphilip012git/security/tree/main/scapy_and_arp)
 - [Scapy Docs](https://scapy.readthedocs.io/en/latest/)
 - [Kali Linux VM](https://www.kali.org/get-kali/#kali-virtual-machines)
 - Tools used: `arpspoof`, `tcpdump`, `wireshark` (for cross-validation)

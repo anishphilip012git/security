@@ -82,7 +82,7 @@
 ---
 
 ### 10. 🔗 **Links & References**
-- GitHub Repo: _[Add here when ready]_
+- GitHub Repo: ['repo'](https://github.com/anishphilip012git/security/tree/main/synprobe_basedon_nmap)
 - Docs: [`nmap`](https://nmap.org/), [`scapy`](https://scapy.readthedocs.io/en/latest/), [`socket`](https://docs.python.org/3/library/socket.html)
 - Tools: `netcat`, `openssl s_client` (used for validation)
 
